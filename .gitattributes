@@ -1,0 +1,2 @@
+# Keep migration files identical on every machine; Prisma checksums them
+api/prisma/migrations/**/*.sql text eol=lf

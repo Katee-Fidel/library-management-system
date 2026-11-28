@@ -1,6 +1,6 @@
 # Library Management System
 
-This assignment builds the data layer for a book catalog. It stores user accounts with patron or librarian roles and classifies each book under one genre.
+This assignment builds the data layer for a book catalog. It stores user accounts with patron or librarian roles, classifies each book under one genre, and records users' reviews of books.
 
 ## Architecture
 
@@ -8,7 +8,7 @@ This assignment builds the data layer for a book catalog. It stores user account
 | --- | --- |
 | NestJS | Starts the backend and manages `PrismaService` through dependency injection. The service connects during startup and disconnects during shutdown. |
 | Prisma ORM | Reads the models in `api/prisma/schema.prisma`, generates a typed client, and applies versioned SQL migrations. |
-| PostgreSQL | Stores the catalog and enforces foreign keys, uniqueness, and allowed role values. |
+| PostgreSQL | Stores the catalog and enforces foreign keys, uniqueness, allowed role values, and the review rating range. |
 | Seed script | Loads four genres and 16 books in one transaction. Rerunning the seed updates the same sample records. |
 
 ## Setup
@@ -33,7 +33,7 @@ npm run db:seed
 npm start
 ```
 
-The migration creates the tables and constraints. The build generates the Prisma Client and compiles the NestJS application. The seed adds the sample catalog. NestJS connects to the database on startup and listens for HTTP on port 3000 by default. Open Prisma Studio from another terminal in `api` to browse the catalog.
+The migrations create the tables and constraints. The build generates the Prisma Client and compiles the NestJS application. The seed adds the sample catalog. NestJS connects to the database on startup and listens for HTTP on port 3000 by default. Open Prisma Studio from another terminal in `api` to browse the catalog.
 
 ```powershell
 npx prisma studio
@@ -44,5 +44,9 @@ npx prisma studio
 `Book.genreId` references `Genre.id`. A genre can classify many books, and every book has one genre. Storing a genre in a single row gives its name one place to change and lets PostgreSQL reject books whose genre does not exist. Embedding a genre in every book would repeat the name and require updating each copy during a rename. The foreign key also prevents deleting a genre while books still reference it, and its index supports filtering the catalog by genre.
 
 `User.email` is unique. `User.role` uses the `Role` enum and defaults to `PATRON`. The other allowed value is `LIBRARIAN`. The enum records the user's role for later authorization checks.
+
+`Review` links a user to a book through `userId` and `bookId`, and stores a `rating` with an optional `comment`. A review carries its own data, so it is a model rather than a plain many-to-many link. A unique constraint on `bookId` and `userId` allows one review per user per book. A `CHECK` constraint limits ratings to 1 through 5; it is written in the migration SQL because the Prisma schema cannot express it. Deleting a book or a user also deletes the related reviews, because a review needs both.
+
+Every table has row-level security enabled with no policies. Supabase can expose the `public` schema through its Data API, and this stops the `anon` and `authenticated` roles from reading or changing rows that way. Prisma connects as the table owner, which row-level security does not restrict, so the role in `DATABASE_URL` must own the tables. A migration that adds a table must enable row-level security on it.
 
 In a document database, a book could embed a genre label and read it directly from the document. With Prisma and PostgreSQL, I modeled the genre as a shared row and made the link explicit so the database can enforce it on every write.

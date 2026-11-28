@@ -13,7 +13,7 @@ Guidance for Claude Code when working in this repository.
 
 ## Project
 
-A library management system. The current scope is the data layer for a book catalog: user accounts with `PATRON` or `LIBRARIAN` roles, and books that each belong to one genre.
+A library management system. The current scope is the data layer for a book catalog: user accounts with `PATRON` or `LIBRARIAN` roles, books that each belong to one genre, and user reviews of books.
 
 **Stack:** NestJS 11, Prisma 6.19.3, PostgreSQL, TypeScript 5.9, Node 20.19+, 22.12+ or 24.x.
 
@@ -62,6 +62,8 @@ The three skills that follow are general patterns. Apply them to the work being 
 - `findUniqueOrThrow({ where: { id, deletedAt: null } })` is valid in this version. Prisma 5+ accepts extra filters alongside a unique field, contrary to the skill's soft-delete example.
 - `prisma migrate deploy` is the command for shared, staging and production databases. Run `prisma migrate dev` only against a local, disposable database.
 - IDs use `@default(cuid())`.
+- Every migration that creates a table must also run `ALTER TABLE "<name>" ENABLE ROW LEVEL SECURITY;`. The database is hosted on Supabase, and Prisma does not add this itself.
+- Never edit a migration that has been applied. Add a new one.
 
 ### CI/CD in this project
 

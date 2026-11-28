@@ -13,10 +13,11 @@ enum Role {
 }
 
 model User {
-  id    String @id @default(cuid())
-  email String @unique
-  name  String
-  role  Role   @default(PATRON)
+  id      String   @id @default(cuid())
+  email   String   @unique
+  name    String
+  role    Role     @default(PATRON)
+  reviews Review[]
 }
 
 model Genre {
@@ -26,11 +27,25 @@ model Genre {
 }
 
 model Book {
-  id      String @id @default(cuid())
+  id      String   @id @default(cuid())
   title   String
   author  String
   genreId String
-  genre   Genre  @relation(fields: [genreId], references: [id], onDelete: Restrict)
+  genre   Genre    @relation(fields: [genreId], references: [id], onDelete: Restrict)
+  reviews Review[]
 
   @@index([genreId])
+}
+
+model Review {
+  id      String  @id @default(cuid())
+  bookId  String
+  book    Book    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating  Int // 1 to 5, enforced by a CHECK constraint in the migration
+  comment String?
+
+  @@unique([bookId, userId])
+  @@index([userId])
 }
