@@ -13,7 +13,7 @@ This assignment builds the data layer for a book catalog. It stores user account
 
 ## Setup
 
-Install Node.js 20.19+, 22.12+, or 24.x, with npm, and create a dedicated PostgreSQL database. The examples below use PowerShell from the repository root.
+Install Node.js 20.19+, 22.12+, or 24.x, with npm, and create a dedicated PostgreSQL database. The examples below use PowerShell, starting from the repository root. Run every `npm` and `npx` command from the `api` folder, which holds `package.json` and `package-lock.json`. `npm ci` fails if you run it from the repository root.
 
 ```powershell
 Set-Location api
@@ -23,8 +23,8 @@ if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 
 Open `api/.env` and set `DATABASE_URL`. Git ignores this file.
 
-- **Local PostgreSQL.** Connect to your PostgreSQL 17 instance on port `5433` in pgAdmin or `psql` and create a database named `library_management`. Use `postgresql://USER:PASSWORD@127.0.0.1:5433/library_management?schema=public`, replacing the role and password with your local login. Percent-encode special characters in the password, such as `@` as `%40`.
-- **Hosted PostgreSQL.** For Supabase, open the project dashboard's **Connect** dialog and copy the Session pooler connection string on port `5432`. Save it as `DATABASE_URL` in `api/.env.hosted`. This works over IPv4 for Prisma migrations. Keep the provider's TLS options in the URL and never commit the environment file.
+- **Local PostgreSQL.** Connect to your PostgreSQL 17 instance in pgAdmin or `psql` and create a database named `library_management`. Use `postgresql://USER:PASSWORD@127.0.0.1:5432/library_management?schema=public`, replacing the role and password with your local login. `5432` is the default port; change it if your server uses another. Percent-encode special characters in the password, such as `@` as `%40`.
+- **Hosted PostgreSQL.** For Supabase, open the project dashboard's **Connect** dialog and copy the Session pooler connection string on port `5432`. Save it as `DATABASE_URL` in `api/.env`. This works over IPv4 for Prisma migrations. Keep the provider's TLS options in the URL and never commit the environment file.
 
 ```powershell
 npm run db:migrate
